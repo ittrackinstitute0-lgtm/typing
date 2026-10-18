@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TypePulse - Modern Typing Mastery & Levels</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: JetBrains Mono & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js & Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-card: rgba(17, 24, 39, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-primary: #f8fafc;
+      --text-muted: #64748b;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-violet: #8b5cf6;
+      --caret-color: #06b6d4;
+      --key-bg: #1e293b;
+      --key-text: #e2e8f0;
+    }
+
+    [data-theme="monkey"] {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #262626;
+      --bg-card: rgba(38, 38, 38, 0.85);
+      --border-color: rgba(255, 255, 255, 0.07);
+      --text-primary: #f5f5f5;
+      --text-muted: #737373;
+      --accent-cyan: #e2b714;
+      --accent-emerald: #10b981;
+      --accent-amber: #e2b714;
+      --accent-rose: #ca4754;
+      --accent-violet: #d1d0c5;
+      --caret-color: #e2b714;
+      --key-bg: #2d2d2d;
+      --key-text: #f5f5f5;
+    }
+
+    [data-theme="synthwave"] {
+      --bg-primary: #12072b;
+      --bg-secondary: #210d47;
+      --bg-card: rgba(33, 13, 71, 0.8);
+      --border-color: rgba(236, 72, 153, 0.2);
+      --text-primary: #fdf2f8;
+      --text-muted: #9d7db8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f43f5e;
+      --accent-rose: #f43f5e;
+      --accent-violet: #ec4899;
+      --caret-color: #ec4899;
+      --key-bg: #2a1254;
+      --key-text: #fdf2f8;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.95);
+      --border-color: rgba(0, 0, 0, 0.08);
+      --text-primary: #0f172a;
+      --text-muted: #64748b;
+      --accent-cyan: #0284c7;
+      --accent-emerald: #059669;
+      --accent-amber: #d97706;
+      --accent-rose: #e11d48;
+      --accent-violet: #7c3aed;
+      --caret-color: #0284c7;
+      --key-bg: #e2e8f0;
+      --key-text: #0f172a;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .mono-font { font-family: 'JetBrains Mono', monospace; }
+
+    .glass-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+    }
+
+    /* Typing Words Stream Area */
+    .typing-box {
+      position: relative;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.45rem;
+      line-height: 2.2rem;
+      user-select: none;
+      outline: none;
+      cursor: text;
+      word-break: break-word;
+    }
+
+    @media (max-width: 768px) {
+      .typing-box {
+        font-size: 1.15rem;
+        line-height: 1.8rem;
+      }
+    }
+
+    /* Animated Caret */
+    .custom-caret {
+      position: absolute;
+      width: 2.5px;
+      height: 2rem;
+      background-color: var(--caret-color);
+      border-radius: 2px;
+      pointer-events: none;
+      transition: left 0.06s ease-out, top 0.06s ease-out;
+      animation: pulse-caret 1s infinite alternate;
+      box-shadow: 0 0 8px var(--caret-color);
+      z-index: 10;
+    }
+
+    @keyframes pulse-caret {
+      0% { opacity: 1; }
+      50% { opacity: 0.85; }
+      100% { opacity: 0.2; }
+    }
+
+    .char-untyped {
+      color: var(--text-muted);
+      transition: color 0.05s ease;
+    }
+
+    .char-correct {
+      color: var(--accent-cyan);
+      text-shadow: 0 0 4px rgba(6, 182, 212, 0.25);
+    }
+
+    .char-incorrect {
+      color: var(--accent-rose) !important;
+      background: rgba(244, 63, 94, 0.15);
+      border-radius: 2px;
+      text-decoration: underline wavy var(--accent-rose);
+      animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both;
+    }
+
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(1px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }
+      40%, 60% { transform: translate3d(2px, 0, 0); }
+    }
+
+    /* Virtual Keyboard */
+    .virtual-key {
+      height: 42px;
+      min-width: 36px;
+      background: var(--key-bg);
+      color: var(--key-text);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+      transition: all 0.08s ease;
+      user-select: none;
+    }
+
+    .virtual-key.active-press {
+      transform: translateY(2px);
+      background: var(--accent-cyan) !important;
+      color: #000000 !important;
+      box-shadow: 0 0 12px var(--accent-cyan);
+    }
+
+    .virtual-key.target-next {
+      border-color: var(--accent-emerald) !important;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      animation: target-pulse 1.2s infinite;
+    }
+
+    @keyframes target-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); border-color: var(--accent-cyan); }
+      100% { transform: scale(1); }
+    }
+
+    .finger-l-pinky { border-bottom: 3px solid #ec4899; }
+    .finger-l-ring { border-bottom: 3px solid #a855f7; }
+    .finger-l-middle { border-bottom: 3px solid #3b82f6; }
+    .finger-l-index { border-bottom: 3px solid #06b6d4; }
+    .finger-thumb { border-bottom: 3px solid #10b981; }
+    .finger-r-index { border-bottom: 3px solid #06b6d4; }
+    .finger-r-middle { border-bottom: 3px solid #3b82f6; }
+    .finger-r-ring { border-bottom: 3px solid #a855f7; }
+    .finger-r-pinky { border-bottom: 3px solid #ec4899; }
+
+    .star-glow {
+      color: #fbbf24;
+      filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-white/10 bg-slate-950/60 backdrop-blur-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-black font-extrabold shadow-lg shadow-cyan-500/25 group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-keyboard text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+            Type<span class="text-cyan-400">Pulse</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">PRO</span>
+          </span>
+          <span class="text-[10px] text-gray-400 block -mt-1 tracking-wide">LEVELS • SPEED • ACCURACY</span>
+        </div>
+      </a>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-1 bg-gray-900/60 p-1.5 rounded-xl border border-white/5">
+        <button id="navPracticeBtn" class="nav-tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold" data-view="viewPractice">
+          <i class="fa-solid fa-bolt mr-1.5"></i> Practice
+        </button>
+        <button id="navLevelsBtn" class="nav-tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-gray-400 hover:text-white" data-view="viewLevels">
+          <i class="fa-solid fa-layer-group mr-1.5"></i> Levels Map
+        </button>
+        <button id="navLeaderboardBtn" class="nav-tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-gray-400 hover:text-white" data-view="viewLeaderboard">
+          <i class="fa-solid fa-trophy mr-1.5 text-amber-400"></i> Leaderboard
+        </button>
+        <button id="navAdminBtn" class="nav-tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition-all text-gray-400 hover:text-white" data-view="viewAdmin">
+          <i class="fa-solid fa-shield-halved mr-1.5 text-purple-400"></i> Admin Panel
+        </button>
+      </nav>
+
+      <!-- Right Controls: Audio Switch, Theme Selector & Student Pill -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Sound Effect Dropdown -->
+        <div class="relative flex items-center">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs text-gray-300">
+            <i class="fa-solid fa-volume-high text-cyan-400"></i>
+            <select id="soundSelector" class="bg-transparent text-xs text-gray-300 outline-none cursor-pointer">
+              <option value="clicky" class="bg-gray-900 text-white">Clicky (Blue)</option>
+              <option value="thock" class="bg-gray-900 text-white">Thock (Navy)</option>
+              <option value="tactile" class="bg-gray-900 text-white">Tactile (Brown)</option>
+              <option value="mute" class="bg-gray-900 text-white">Mute (Silent)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Theme Selector -->
+        <div class="hidden sm:flex items-center">
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs text-gray-300">
+            <i class="fa-solid fa-palette text-cyan-400"></i>
+            <select id="themeSelector" class="bg-transparent text-xs text-gray-300 outline-none cursor-pointer">
+              <option value="cyber" class="bg-gray-900 text-white">Midnight Cyber</option>
+              <option value="monkey" class="bg-gray-900 text-white">Monkey Carbon</option>
+              <option value="synthwave" class="bg-gray-900 text-white">Retro Synth</option>
+              <option value="light" class="bg-gray-900 text-white">Clean Light</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Student Profile Button -->
+        <button id="studentProfileBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-semibold text-cyan-300 transition-all cursor-pointer">
+          <i class="fa-regular fa-user-circle text-cyan-400"></i>
+          <span id="navStudentName">Guest Typist</span>
+          <i class="fa-solid fa-pen text-[9px] text-cyan-500"></i>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-md border-t border-white/10 flex justify-around py-2.5">
+    <button class="nav-tab-btn flex flex-col items-center text-[10px] text-cyan-400" data-view="viewPractice">
+      <i class="fa-solid fa-bolt text-base mb-0.5"></i> Practice
+    </button>
+    <button class="nav-tab-btn flex flex-col items-center text-[10px] text-gray-400" data-view="viewLevels">
+      <i class="fa-solid fa-layer-group text-base mb-0.5"></i> Levels
+    </button>
+    <button class="nav-tab-btn flex flex-col items-center text-[10px] text-gray-400" data-view="viewLeaderboard">
+      <i class="fa-solid fa-trophy text-base mb-0.5 text-amber-400"></i> Rank
+    </button>
+    <button class="nav-tab-btn flex flex-col items-center text-[10px] text-gray-400" data-view="viewAdmin">
+      <i class="fa-solid fa-shield-halved text-base mb-0.5 text-purple-400"></i> Admin
+    </button>
+  </div>
+
+  <!-- Main Views Container -->
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- VIEW 1: PRACTICE ARENA -->
+    <div id="viewPractice" class="main-view-section max-w-5xl mx-auto space-y-6">
+      
+      <!-- Top Toolbar: Mode Selection & Quick Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-3.5 rounded-2xl border border-white/5">
+        <!-- Practice Mode Tabs -->
+        <div class="flex items-center gap-1.5 bg-gray-950/80 p-1 rounded-xl border border-white/5 text-xs font-semibold">
+          <button id="modeLevelBtn" class="px-3.5 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-bold transition-all">
+            <i class="fa-solid fa-gamepad mr-1"></i> Level Mode
+          </button>
+          <button id="modeWordsBtn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all">
+            <i class="fa-solid fa-font mr-1"></i> 25 Words
+          </button>
+          <button id="modeQuoteBtn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all">
+            <i class="fa-solid fa-quote-left mr-1"></i> Quotes
+          </button>
+        </div>
+
+        <!-- Quick Level Pills Container -->
+        <div id="levelPillsContainer" class="flex items-center gap-1.5 overflow-x-auto py-1 max-w-full">
+          <!-- Populated via JavaScript -->
+        </div>
+
+        <!-- Keyboard Toggle & Quick Restart -->
+        <div class="flex items-center gap-2">
+          <button id="toggleKeyboardBtn" title="Toggle On-screen Virtual Keyboard" class="px-3 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs font-semibold text-cyan-400 hover:bg-gray-800 transition-all flex items-center gap-1.5">
+            <i class="fa-regular fa-keyboard"></i>
+            <span class="hidden sm:inline">Keyboard</span>
+          </button>
+          <button id="restartTestBtn" title="Restart Test (Tab + Enter)" class="px-3 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate-right text-cyan-400"></i>
+            <span class="hidden sm:inline">Restart</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Level Header Banner -->
+      <div class="glass-panel p-5 rounded-2xl border border-cyan-500/20 relative overflow-hidden">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2.5 mb-1.5">
+              <span id="activeLevelBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                LEVEL 1
+              </span>
+              <h2 id="activeLevelTitle" class="text-xl font-bold text-white tracking-tight">Home Row Foundations</h2>
+            </div>
+            <p id="activeLevelDesc" class="text-xs text-gray-400">Master the anchor keys: A S D F for left hand and J K L ; for right hand.</p>
+          </div>
+
+          <div class="text-right sm:text-right">
+            <div id="activeLevelTarget" class="inline-block px-3.5 py-1.5 rounded-xl bg-gray-900/90 border border-gray-700/80 text-xs font-mono font-semibold text-cyan-300">
+              🎯 Target: 18 WPM | 85% Accuracy
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stats Heads-Up Display (HUD) -->
+      <div class="grid grid-cols-3 gap-4">
+        <div class="glass-panel p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+          <span class="text-[11px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Speed (WPM)</span>
+          <span id="liveWpm" class="text-4xl font-extrabold text-cyan-400 font-mono tracking-tight">0</span>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+          <span class="text-[11px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Accuracy</span>
+          <span id="liveAccuracy" class="text-4xl font-extrabold text-emerald-400 font-mono tracking-tight">100%</span>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+          <span class="text-[11px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Time</span>
+          <span id="liveTime" class="text-4xl font-extrabold text-amber-400 font-mono tracking-tight">0s</span>
+        </div>
+      </div>
+
+      <!-- Main Typing Canvas Arena -->
+      <div class="relative glass-panel rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl focus-within:border-cyan-500/40 transition-all cursor-text min-h-[180px] flex flex-col justify-between" onclick="document.getElementById('typingWords').focus()">
+        
+        <div class="relative w-full">
+          <div id="customCaret" class="custom-caret" style="left: 0; top: 0; display: none;"></div>
+          <div id="typingWords" class="typing-box min-h-[110px] text-gray-300 focus:outline-none" tabindex="0">
+            <!-- Rendered by typing engine -->
+          </div>
+        </div>
+
+        <!-- Typing Progress Bar -->
+        <div class="w-full bg-gray-900 rounded-full h-1.5 mt-4 overflow-hidden border border-white/5">
+          <div id="typingProgressBar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 rounded-full transition-all duration-150" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Interactive Mechanical Virtual Keyboard -->
+      <div id="virtualKeyboardWrapper" class="glass-panel p-5 rounded-2xl border border-white/5 shadow-xl transition-all">
+        <div class="flex items-center justify-between mb-3 text-xs text-gray-400">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-fingerprint text-cyan-400"></i>
+            <span class="font-semibold text-gray-300">Tactile Finger Placement Guide</span>
+          </div>
+          <div class="flex items-center gap-3 text-[10px] font-mono">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-500"></span> Pinky</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Ring</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Middle</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Index</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thumb</span>
+          </div>
+        </div>
+        
+        <div id="virtualKeyboard" class="overflow-x-auto py-2">
+          <!-- Populated via keyboard.js -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VIEW 2: LEVELS ROADMAP -->
+    <div id="viewLevels" class="main-view-section hidden max-w-6xl mx-auto space-y-8">
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/20 relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 inline-block mb-2">
+              Curriculum & Career Path
+            </span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Typing Levels Roadmap</h1>
+            <p class="text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
+              Step-by-step progressive mastery. Complete each level by achieving the required speed (WPM) and accuracy to unlock the next stage!
+            </p>
+          </div>
+
+          <div class="bg-gray-950/80 p-5 rounded-2xl border border-gray-800 min-w-[260px]">
+            <div class="flex items-center justify-between text-xs font-bold text-gray-400 mb-2">
+              <span>Overall Journey</span>
+              <span id="mapProgressText" class="text-cyan-400 font-mono">0 of 10 Completed</span>
+            </div>
+            <div class="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden border border-white/5 mb-3">
+              <div id="mapProgressBar" class="bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-gray-500">
+              <span><i class="fa-solid fa-lock text-gray-600 mr-1"></i> Progressive Lock</span>
+              <span><i class="fa-solid fa-star text-amber-400 mr-1"></i> 3-Star Honors</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="levelsMapContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- VIEW 3: LEADERBOARD -->
+    <div id="viewLeaderboard" class="main-view-section hidden max-w-5xl mx-auto space-y-8">
+      <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-white/5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 inline-block mb-2">
+              <i class="fa-solid fa-trophy mr-1"></i> Hall of Fame
+            </span>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">Speed Leaderboard</h1>
+            <p class="text-xs text-gray-400 mt-1">Celebrating our fastest students and master typists.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top 3 Typists Podium -->
+      <div id="podiumContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end pt-4"></div>
+
+      <!-- Rankings Table -->
+      <div class="glass-panel rounded-3xl border border-white/5 overflow-hidden shadow-xl">
+        <div class="p-4 border-b border-gray-800/80 flex items-center justify-between">
+          <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
+            <i class="fa-solid fa-ranking-star text-amber-400"></i> Typist Rankings
+          </h3>
+          <div class="relative w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-500"></i>
+            <input type="text" id="leaderboardSearchInput" placeholder="Search typist name..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-gray-900/90 border border-gray-800 text-xs text-gray-200 outline-none focus:border-cyan-400">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-gray-950/90 text-gray-400 uppercase font-mono tracking-wider border-b border-gray-800">
+              <tr>
+                <th class="py-3.5 px-6">Rank</th>
+                <th class="py-3.5 px-6">Typist</th>
+                <th class="py-3.5 px-6">Stage</th>
+                <th class="py-3.5 px-6">Speed</th>
+                <th class="py-3.5 px-6">Accuracy</th>
+                <th class="py-3.5 px-6 text-right">Date</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardTableBody" class="divide-y divide-gray-800/60 font-sans"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW 4: ADMIN PANEL -->
+    <div id="viewAdmin" class="main-view-section hidden max-w-7xl mx-auto space-y-6">
+      
+      <!-- Admin Password Check Screen (if not logged in) -->
+      <div id="adminLockScreen" class="max-w-md mx-auto my-12 glass-panel rounded-3xl p-8 border border-white/10 shadow-2xl text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center text-white text-2xl mb-4 shadow-lg shadow-purple-500/30">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h2 class="text-2xl font-extrabold text-white">Admin Authentication</h2>
+        <p class="text-xs text-gray-400 mt-1 mb-6">Enter admin password to access curriculum and logs</p>
+        
+        <div class="space-y-4">
+          <input type="password" id="adminPasswordInput" placeholder="Enter password (default: admin123)" class="w-full px-4 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-xs outline-none focus:border-cyan-400">
+          <button id="adminLoginBtn" class="w-full py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-600/25 transition-all">
+            Unlock Admin Panel
+          </button>
+          <p class="text-[11px] text-gray-500">Default Password: <span class="font-mono text-cyan-300">admin123</span></p>
+        </div>
+      </div>
+
+      <!-- Admin Dashboard Content (Unlocked) -->
+      <div id="adminDashboardContent" class="hidden space-y-6">
+        
+        <!-- Admin Header -->
+        <div class="glass-panel p-6 rounded-3xl border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xl">
+              <i class="fa-solid fa-gauge-high"></i>
+            </div>
+            <div>
+              <h1 class="text-2xl font-extrabold text-white">Admin Control Center</h1>
+              <p class="text-xs text-gray-400">Curriculum management, student test logs, and settings</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="adminExportCsvBtn" class="px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-700 hover:border-gray-600 text-xs font-semibold text-gray-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV
+            </button>
+            <button id="adminLockBtn" class="px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold text-rose-300">
+              <i class="fa-solid fa-lock mr-1"></i> Lock
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="glass-panel p-4 rounded-2xl border border-white/5">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Total Tests</span>
+            <div id="statTotalTests" class="text-2xl font-extrabold text-cyan-400 font-mono">0</div>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl border border-white/5">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Avg Speed</span>
+            <div id="statAvgWpm" class="text-2xl font-extrabold text-emerald-400 font-mono">0 WPM</div>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl border border-white/5">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Pass Rate</span>
+            <div id="statPassRate" class="text-2xl font-extrabold text-amber-400 font-mono">0%</div>
+          </div>
+          <div class="glass-panel p-4 rounded-2xl border border-white/5">
+            <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1">Levels Count</span>
+            <div id="statTotalLevels" class="text-2xl font-extrabold text-purple-400 font-mono">10</div>
+          </div>
+        </div>
+
+        <!-- Levels CRUD Table & Add Level Button -->
+        <div class="glass-panel p-6 rounded-3xl border border-white/5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-cyan-400"></i> Levels & Lessons Management
+            </h3>
+            <button id="openAddLevelModalBtn" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-all flex items-center gap-2 cursor-pointer">
+              <i class="fa-solid fa-plus"></i> Add New Level
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-gray-950/90 text-gray-400 uppercase font-mono border-b border-gray-800">
+                <tr>
+                  <th class="py-3 px-4">Level</th>
+                  <th class="py-3 px-4">Title</th>
+                  <th class="py-3 px-4">Category</th>
+                  <th class="py-3 px-4">Target (WPM / Acc)</th>
+                  <th class="py-3 px-4">Text Preview</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adminLevelsTableBody" class="divide-y divide-gray-800/60 font-sans"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Historical Student Test Logs Table -->
+        <div class="glass-panel p-6 rounded-3xl border border-white/5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-emerald-400"></i> Student Test Records & Telemetry
+            </h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-gray-950/90 text-gray-400 uppercase font-mono border-b border-gray-800">
+                <tr>
+                  <th class="py-3 px-4">Student</th>
+                  <th class="py-3 px-4">Level</th>
+                  <th class="py-3 px-4">Speed</th>
+                  <th class="py-3 px-4">Accuracy</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Date</th>
+                </tr>
+              </thead>
+              <tbody id="adminResultsTableBody" class="divide-y divide-gray-800/60 font-sans"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modern Footer -->
+  <footer class="border-t border-white/5 py-6 bg-slate-950/40 text-center text-xs text-gray-500 mt-12 pb-16 md:pb-6">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-keyboard text-cyan-400"></i>
+        <span>TypePulse • Next-Generation Typing Levels Platform</span>
+      </div>
+      <div class="flex items-center gap-4 text-gray-400 font-mono text-[11px]">
+        <span><kbd class="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-300">Tab</kbd> + <kbd class="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-300">Enter</kbd> to restart</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Results Modal -->
+  <div id="resultsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+      <div class="text-center mb-6">
+        <div id="modalStars" class="flex justify-center items-center mb-2"></div>
+        <h3 id="modalTitle" class="text-2xl font-extrabold text-white tracking-tight">Level Passed! 🎉</h3>
+        <div class="mt-2">
+          <span id="modalStatusBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            REQUIREMENTS MET
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+          <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Net WPM</span>
+          <span id="modalWpm" class="text-2xl font-extrabold text-cyan-400 font-mono">0</span>
+        </div>
+        <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+          <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Accuracy</span>
+          <span id="modalAcc" class="text-2xl font-extrabold text-emerald-400 font-mono">0%</span>
+        </div>
+        <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+          <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Errors</span>
+          <span id="modalErrors" class="text-2xl font-extrabold text-rose-400 font-mono">0</span>
+        </div>
+        <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+          <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Time</span>
+          <span id="modalTime" class="text-2xl font-extrabold text-amber-400 font-mono">0s</span>
+        </div>
+      </div>
+
+      <div class="mb-6 p-4 rounded-2xl bg-gray-950/80 border border-gray-800">
+        <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+          <span class="font-semibold text-gray-300"><i class="fa-solid fa-chart-line text-cyan-400 mr-1.5"></i> Speed Trajectory (WPM)</span>
+        </div>
+        <div class="h-36 w-full">
+          <canvas id="resultsSpeedChart"></canvas>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center gap-3">
+        <button id="modalRetryBtn" class="w-full py-3 px-4 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate-right"></i> Try Again
+        </button>
+        <button id="modalNextLevelBtn" class="w-full py-3 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2">
+          Next Level <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Name Switcher Modal -->
+  <div id="studentProfileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-cyan-500/30 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-id-card text-cyan-400"></i> Student Profile
+        </h3>
+        <button onclick="document.getElementById('studentProfileModal').classList.add('hidden')" class="text-gray-400 hover:text-white text-lg">&times;</button>
+      </div>
+      <p class="text-xs text-gray-400 mb-4">Enter your name or Roll Number to save your test records and ranking.</p>
+      <div class="mb-4">
+        <input type="text" id="studentUsernameInput" placeholder="e.g. Alex or Roll-101" class="w-full px-4 py-2.5 rounded-xl bg-gray-900 border border-gray-700 text-white text-sm outline-none focus:border-cyan-400">
+      </div>
+      <div class="flex justify-end gap-2.5">
+        <button onclick="document.getElementById('studentProfileModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white">Cancel</button>
+        <button id="saveStudentBtn" class="px-5 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-black hover:bg-cyan-400 transition-all">Save Profile</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Level Modal -->
+  <div id="levelFormModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-6 border border-white/10 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="levelModalTitle" class="text-base font-bold text-white">Add New Typing Level</h3>
+        <button onclick="document.getElementById('levelFormModal').classList.add('hidden')" class="text-gray-400 hover:text-white">&times;</button>
+      </div>
+      <form id="levelModalForm" class="space-y-3 text-xs">
+        <input type="hidden" id="modalLevelId">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-300 font-semibold mb-1">Level Number</label>
+            <input type="number" id="modalLevelNum" required class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-gray-300 font-semibold mb-1">Category</label>
+            <input type="text" id="modalLevelCategory" required class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-300 font-semibold mb-1">Title</label>
+          <input type="text" id="modalLevelTitle" required class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white outline-none">
+        </div>
+        <div>
+          <label class="block text-gray-300 font-semibold mb-1">Description</label>
+          <input type="text" id="modalLevelDesc" class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-300 font-semibold mb-1">Target WPM</label>
+            <input type="number" id="modalLevelWpm" value="25" required class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white outline-none">
+          </div>
+          <div>
+            <label class="block text-gray-300 font-semibold mb-1">Min Accuracy %</label>
+            <input type="number" id="modalLevelAcc" value="90" required class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-300 font-semibold mb-1">Practice Words / Sentences Content</label>
+          <textarea id="modalLevelContent" rows="3" required class="w-full px-3 py-2 rounded-xl bg-gray-900 border border-gray-800 text-white font-mono outline-none"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="document.getElementById('levelFormModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-gray-400">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl font-bold bg-cyan-500 text-black hover:bg-cyan-400">Save Level</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Shared Scripts -->
+  <script src="static/js/sound.js"></script>
+  <script src="static/js/keyboard.js"></script>
+  <script src="static/js/charts.js"></script>
+
+  <!-- Complete Standalone Engine & Logic -->
+  <script>
+    // Default 10 Seed Levels
+    const DEFAULT_LEVELS = [
+      { level_number: 1, title: "Home Row Foundations", category: "Home Row", description: "Master anchor keys: A S D F for left hand and J K L ; for right hand.", content: "asdf jkl; asdf jkl; sad dad lad fall flask ask all salad dads lads flak fads flask", target_wpm: 18, min_accuracy: 85 },
+      { level_number: 2, title: "Home Row Fluency", category: "Home Row", description: "Build muscle memory and word flow using pure home row letters.", content: "a sad dad asks a lad all fall as a flask falls dad asks a lad to ask all dad had a flask", target_wpm: 22, min_accuracy: 90 },
+      { level_number: 3, title: "Top Row Reach (E, R, U, I, O)", category: "Top Row", description: "Extend your index and middle fingers to reach top vowels and letters.", content: "read fire safe side file user sure ride dire rule look road free fear soul silk leaf lake deal real dare rule order", target_wpm: 25, min_accuracy: 90 },
+      { level_number: 4, title: "Bottom Row Navigation (C, V, B, N, M)", category: "Bottom Row", description: "Train lower finger dexterity and bottom row transitions cleanly.", content: "come back move man can vim calm ban mob beam vain cab bean mock combine carbon bench balance cabin normal", target_wpm: 28, min_accuracy: 90 },
+      { level_number: 5, title: "Common English Rhythm", category: "Full Alphabet", description: "Smooth flow through top 100 English words to establish cadence.", content: "the quick brown fox jumps over the lazy dog they have been working hard to build their skills every single day with focus", target_wpm: 32, min_accuracy: 92 },
+      { level_number: 6, title: "Capitalization & Punctuation", category: "Punctuation", description: "Integrate Shift keys, commas, periods, apostrophes smoothly.", content: "Practice doesn't make perfect; only perfect practice makes perfect. Hard work beats talent when talent doesn't work hard!", target_wpm: 35, min_accuracy: 92 },
+      { level_number: 7, title: "Number Row & Mixed Symbols", category: "Numbers & Symbols", description: "Conquer the top number row and monetary symbols without looking down.", content: "In 2026, over 95% of developers use typing tests. Room 404 has 12 laptops, 35 keyboards, and 88 cables priced at $49.99.", target_wpm: 30, min_accuracy: 90 },
+      { level_number: 8, title: "Developer Code Syntax", category: "Programming", description: "Crucial brackets {}, [], arrows =>, semicolons, and code structures.", content: "const speed = (chars / 5) / (time / 60); if (accuracy >= 95) { return \"Level Passed!\"; } else { retry(); }", target_wpm: 35, min_accuracy: 90 },
+      { level_number: 9, title: "High Speed Sprint", category: "Speed Rush", description: "Fast burst typing to break past speed plateaus and elevate WPM.", content: "system power energy lightning speed stream quick flow motion action target rhythm impact boost rapid pulse reflex champion victory", target_wpm: 45, min_accuracy: 94 },
+      { level_number: 10, title: "Master Typist Final Trial", category: "Grandmaster", description: "Prose mastery, long sentence cadence, and ultimate dexterity test.", content: "Excellence is not an extraordinary thing, but a series of ordinary actions performed extraordinarily well. Master your fingertips, cultivate your rhythm, and unlock your boundless potential.", target_wpm: 55, min_accuracy: 95 }
+    ];
+
+    // Data Storage Management (Local + Optional Server Sync)
+    class StorageService {
+      static getLevels() {
+        const stored = localStorage.getItem('typepulse_custom_levels');
+        if (stored) {
+          try { return JSON.parse(stored); } catch(e) {}
+        }
+        return DEFAULT_LEVELS;
+      }
+      static saveLevels(levels) {
+        localStorage.setItem('typepulse_custom_levels', JSON.stringify(levels));
+      }
+      static getStudent() {
+        return localStorage.getItem('typepulse_student') || 'Guest Typist';
+      }
+      static setStudent(name) {
+        localStorage.setItem('typepulse_student', name);
+      }
+      static getHighestUnlocked() {
+        return parseInt(localStorage.getItem('typepulse_unlocked_lvl') || '1');
+      }
+      static setHighestUnlocked(num) {
+        localStorage.setItem('typepulse_unlocked_lvl', num.toString());
+      }
+      static getTestResults() {
+        const stored = localStorage.getItem('typepulse_results');
+        return stored ? JSON.parse(stored) : [];
+      }
+      static saveTestResult(result) {
+        const list = this.getTestResults();
+        list.unshift(result);
+        localStorage.setItem('typepulse_results', JSON.stringify(list));
+      }
+    }
+
+    // Main App Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Theme initialization
+      const savedTheme = localStorage.getItem('typepulse_theme') || 'cyber';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const themeSelector = document.getElementById('themeSelector');
+      if (themeSelector) {
+        themeSelector.value = savedTheme;
+        themeSelector.addEventListener('change', (e) => {
+          document.documentElement.setAttribute('data-theme', e.target.value);
+          localStorage.setItem('typepulse_theme', e.target.value);
+        });
+      }
+
+      // 2. Sound Switcher
+      const soundSelector = document.getElementById('soundSelector');
+      if (soundSelector && window.soundManager) {
+        soundSelector.value = window.soundManager.getSoundType();
+        soundSelector.addEventListener('change', (e) => {
+          window.soundManager.setSoundType(e.target.value);
+        });
+      }
+
+      // 3. Setup Virtual Keyboard & Typing Engine
+      const virtualKeyboard = new window.VirtualKeyboard('virtualKeyboard');
+      const textContainer = document.getElementById('typingWords');
+      const caret = document.getElementById('customCaret');
+      const wpmEl = document.getElementById('liveWpm');
+      const accEl = document.getElementById('liveAccuracy');
+      const timeEl = document.getElementById('liveTime');
+      const progressBar = document.getElementById('typingProgressBar');
+
+      let currentLevelNum = 1;
+      let levels = StorageService.getLevels();
+      let currentLevel = levels[0];
+      let text = currentLevel.content;
+      let charElements = [];
+      let currentIndex = 0;
+      let errorsCount = 0;
+      let totalTyped = 0;
+      let startTime = null;
+      let timerInterval = null;
+      let isTestRunning = false;
+      let isTestFinished = false;
+      let wpmTimeline = [];
+
+      // Update student profile name
+      const studentName = StorageService.getStudent();
+      document.getElementById('navStudentName').textContent = studentName;
+      document.getElementById('studentUsernameInput').value = studentName === 'Guest Typist' ? '' : studentName;
+
+      function renderText() {
+        textContainer.innerHTML = '';
+        charElements = [];
+        const words = text.split(' ');
+        let globalIndex = 0;
+
+        words.forEach((word, wIdx) => {
+          const wordSpan = document.createElement('span');
+          wordSpan.className = 'inline-block whitespace-nowrap mr-2 mb-1';
+
+          for (let i = 0; i < word.length; i++) {
+            const span = document.createElement('span');
+            span.textContent = word[i];
+            span.className = 'char-untyped';
+            wordSpan.appendChild(span);
+            charElements.push(span);
+            globalIndex++;
+          }
+
+          if (wIdx < words.length - 1) {
+            const spaceSpan = document.createElement('span');
+            spaceSpan.innerHTML = '&nbsp;';
+            spaceSpan.className = 'char-untyped';
+            wordSpan.appendChild(spaceSpan);
+            charElements.push(spaceSpan);
+            globalIndex++;
+          }
+          textContainer.appendChild(wordSpan);
+        });
+      }
+
+      function updateCaret() {
+        if (!caret || !charElements.length) return;
+        if (currentIndex < charElements.length) {
+          const target = charElements[currentIndex];
+          const boxRect = textContainer.getBoundingClientRect();
+          const targetRect = target.getBoundingClientRect();
+          caret.style.left = `${targetRect.left - boxRect.left}px`;
+          caret.style.top = `${targetRect.top - boxRect.top}px`;
+          caret.style.height = `${targetRect.height || 28}px`;
+          caret.style.display = 'block';
+        }
+      }
+
+      function resetTest() {
+        clearInterval(timerInterval);
+        currentIndex = 0;
+        errorsCount = 0;
+        totalTyped = 0;
+        startTime = null;
+        isTestRunning = false;
+        isTestFinished = false;
+        wpmTimeline = [];
+        wpmEl.textContent = '0';
+        accEl.textContent = '100%';
+        timeEl.textContent = '0s';
+        progressBar.style.width = '0%';
+        charElements.forEach(el => el.className = 'char-untyped');
+        updateCaret();
+        if (text.length > 0) virtualKeyboard.highlightNext(text[0]);
+      }
+
+      function selectLevel(num) {
+        levels = StorageService.getLevels();
+        const found = levels.find(l => l.level_number === num) || levels[0];
+        currentLevelNum = found.level_number;
+        currentLevel = found;
+        text = found.content;
+
+        document.getElementById('activeLevelBadge').textContent = `LEVEL ${found.level_number}`;
+        document.getElementById('activeLevelTitle').textContent = found.title;
+        document.getElementById('activeLevelDesc').textContent = found.description || '';
+        document.getElementById('activeLevelTarget').textContent = `🎯 Target: ${found.target_wpm} WPM | ${found.min_accuracy}% Accuracy`;
+
+        renderLevelPills();
+        renderText();
+        resetTest();
+      }
+
+      function renderLevelPills() {
+        const container = document.getElementById('levelPillsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        const highestUnlocked = StorageService.getHighestUnlocked();
+
+        levels.forEach(lvl => {
+          const isUnlocked = lvl.level_number <= highestUnlocked;
+          const isCurrent = lvl.level_number === currentLevelNum;
+          const pill = document.createElement('button');
+          pill.className = `px-3 py-1.5 rounded-lg border text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+            isCurrent
+              ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold'
+              : isUnlocked
+              ? 'bg-gray-800/60 border-gray-700/60 text-gray-300 hover:border-gray-500'
+              : 'bg-gray-900/40 border-gray-800 text-gray-600 opacity-60'
+          }`;
+          pill.innerHTML = isUnlocked ? `Lvl ${lvl.level_number}` : `<i class="fa-solid fa-lock text-[10px]"></i> Lvl ${lvl.level_number}`;
+          pill.addEventListener('click', () => {
+            if (isUnlocked) selectLevel(lvl.level_number);
+            else alert(`Level ${lvl.level_number} is locked! Pass previous levels first.`);
+          });
+          container.appendChild(pill);
+        });
+      }
+
+      // Keystroke typing listener
+      window.addEventListener('keydown', (e) => {
+        if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          resetTest();
+          return;
+        }
+        if (isTestFinished) return;
+        if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock'].includes(e.key)) return;
+
+        virtualKeyboard.pressKey(e.code);
+
+        if (e.key === 'Backspace') {
+          e.preventDefault();
+          if (currentIndex > 0) {
+            currentIndex--;
+            charElements[currentIndex].className = 'char-untyped';
+            updateCaret();
+            virtualKeyboard.highlightNext(text[currentIndex]);
+            if (window.soundManager) window.soundManager.playKeySound('backspace');
+          }
+          return;
+        }
+
+        if (e.key.length !== 1) return;
+        e.preventDefault();
+
+        // Start timer
+        if (!isTestRunning) {
+          isTestRunning = true;
+          startTime = Date.now();
+          timerInterval = setInterval(() => {
+            const elapsed = Math.max(1, (Date.now() - startTime) / 1000);
+            const correct = Math.max(0, totalTyped - errorsCount);
+            const wpm = Math.round((correct / 5) / (elapsed / 60));
+            const acc = totalTyped > 0 ? Math.round(((totalTyped - errorsCount) / totalTyped) * 100) : 100;
+            wpmEl.textContent = Math.max(0, wpm);
+            accEl.textContent = `${acc}%`;
+            timeEl.textContent = `${Math.round(elapsed)}s`;
+            wpmTimeline.push({ time: Math.round(elapsed), wpm: Math.max(0, wpm) });
+          }, 300);
+        }
+
+        totalTyped++;
+        const expected = text[currentIndex];
+        const typed = e.key;
+
+        if (typed === expected) {
+          charElements[currentIndex].className = 'char-correct';
+          if (window.soundManager) window.soundManager.playKeySound(typed);
+        } else {
+          charElements[currentIndex].className = 'char-incorrect';
+          errorsCount++;
+          if (window.soundManager) window.soundManager.playErrorSound();
+        }
+
+        currentIndex++;
+        updateCaret();
+
+        const pct = Math.min(100, Math.round((currentIndex / text.length) * 100));
+        progressBar.style.width = `${pct}%`;
+
+        if (currentIndex < text.length) {
+          virtualKeyboard.highlightNext(text[currentIndex]);
+        } else {
+          // Finished!
+          finishTest();
+        }
+      });
+
+      function finishTest() {
+        isTestFinished = true;
+        isTestRunning = false;
+        clearInterval(timerInterval);
+
+        const elapsed = Math.max(1, (Date.now() - startTime) / 1000);
+        const correct = Math.max(0, totalTyped - errorsCount);
+        const wpm = Math.max(0, Math.round((correct / 5) / (elapsed / 60)));
+        const rawWpm = Math.max(0, Math.round((totalTyped / 5) / (elapsed / 60)));
+        const acc = totalTyped > 0 ? Math.round(((totalTyped - errorsCount) / totalTyped) * 100) : 100;
+
+        const passed = (wpm >= currentLevel.target_wpm && acc >= currentLevel.min_accuracy);
+        let stars = 1;
+        if (wpm >= currentLevel.target_wpm * 1.5) stars = 3;
+        else if (wpm >= currentLevel.target_wpm * 1.2) stars = 2;
+
+        // Save result
+        const record = {
+          student_name: StorageService.getStudent(),
+          level_number: currentLevelNum,
+          wpm: wpm,
+          raw_wpm: rawWpm,
+          accuracy: acc,
+          errors_count: errorsCount,
+          time_seconds: Math.round(elapsed),
+          passed: passed,
+          stars: stars,
+          created_at: new Date().toLocaleTimeString()
+        };
+        StorageService.saveTestResult(record);
+
+        // Unlock next level if passed
+        const curUnlocked = StorageService.getHighestUnlocked();
+        if (passed && currentLevelNum === curUnlocked) {
+          StorageService.setHighestUnlocked(curUnlocked + 1);
+        }
+
+        // Render modal
+        document.getElementById('modalWpm').textContent = wpm;
+        document.getElementById('modalAcc').textContent = `${acc}%`;
+        document.getElementById('modalErrors').textContent = errorsCount;
+        document.getElementById('modalTime').textContent = `${Math.round(elapsed)}s`;
+
+        let starsHtml = '';
+        for (let s = 1; s <= 3; s++) {
+          starsHtml += s <= stars ? '<i class="fa-solid fa-star text-amber-400 star-glow text-2xl mx-1"></i>' : '<i class="fa-regular fa-star text-gray-600 text-2xl mx-1"></i>';
+        }
+        document.getElementById('modalStars').innerHTML = starsHtml;
+
+        const nextBtn = document.getElementById('modalNextLevelBtn');
+        if (passed) {
+          document.getElementById('modalTitle').innerHTML = `🎉 Level Passed!`;
+          document.getElementById('modalStatusBadge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          document.getElementById('modalStatusBadge').textContent = 'REQUIREMENTS MET';
+          nextBtn.classList.remove('hidden');
+          if (window.soundManager) window.soundManager.playVictoryChord();
+          if (window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        } else {
+          document.getElementById('modalTitle').innerHTML = `⚡ Keep Practicing!`;
+          document.getElementById('modalStatusBadge').className = 'px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/20 text-rose-400 border border-rose-500/30';
+          document.getElementById('modalStatusBadge').textContent = `TARGET: ${currentLevel.target_wpm} WPM | ${currentLevel.min_accuracy}% ACC`;
+          nextBtn.classList.add('hidden');
+        }
+
+        if (window.renderSpeedChart) window.renderSpeedChart(wpmTimeline);
+        document.getElementById('resultsModal').classList.remove('hidden');
+        renderLevelPills();
+      }
+
+      // Initial render
+      selectLevel(1);
+
+      // Buttons
+      document.getElementById('restartTestBtn').addEventListener('click', resetTest);
+      document.getElementById('modalRetryBtn').addEventListener('click', () => {
+        document.getElementById('resultsModal').classList.add('hidden');
+        resetTest();
+      });
+      document.getElementById('modalNextLevelBtn').addEventListener('click', () => {
+        document.getElementById('resultsModal').classList.add('hidden');
+        selectLevel(currentLevelNum + 1);
+      });
+
+      // View Switching (Practice, Levels, Leaderboard, Admin)
+      const navBtns = document.querySelectorAll('.nav-tab-btn');
+      const viewSections = document.querySelectorAll('.main-view-section');
+
+      navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetViewId = btn.getAttribute('data-view');
+          navBtns.forEach(b => {
+            b.classList.remove('bg-cyan-500/20', 'border-cyan-400', 'text-cyan-300', 'font-bold');
+            b.classList.add('text-gray-400');
+          });
+          btn.classList.add('bg-cyan-500/20', 'border-cyan-400', 'text-cyan-300', 'font-bold');
+          btn.classList.remove('text-gray-400');
+
+          viewSections.forEach(v => v.classList.add('hidden'));
+          document.getElementById(targetViewId).classList.remove('hidden');
+
+          if (targetViewId === 'viewLevels') renderLevelsRoadmap();
+          if (targetViewId === 'viewLeaderboard') renderLeaderboard();
+          if (targetViewId === 'viewAdmin') loadAdminDashboard();
+        });
+      });
+
+      // Student Profile Modal
+      document.getElementById('studentProfileBtn').addEventListener('click', () => {
+        document.getElementById('studentProfileModal').classList.remove('hidden');
+      });
+      document.getElementById('saveStudentBtn').addEventListener('click', () => {
+        const val = document.getElementById('studentUsernameInput').value.trim();
+        if (val) {
+          StorageService.setStudent(val);
+          document.getElementById('navStudentName').textContent = val;
+          document.getElementById('studentProfileModal').classList.add('hidden');
+        }
+      });
+
+      // Render Levels Roadmap View
+      function renderLevelsRoadmap() {
+        const container = document.getElementById('levelsMapContainer');
+        container.innerHTML = '';
+        const highest = StorageService.getHighestUnlocked();
+        const results = StorageService.getTestResults();
+
+        document.getElementById('mapProgressText').textContent = `${Math.min(levels.length, highest - 1)} of ${levels.length} Completed`;
+        document.getElementById('mapProgressBar').style.width = `${Math.min(100, Math.round(((highest - 1) / levels.length) * 100))}%`;
+
+        levels.forEach(lvl => {
+          const unlocked = lvl.level_number <= highest;
+          const bestRecord = results.find(r => r.level_number === lvl.level_number && r.passed);
+          const card = document.createElement('div');
+          card.className = `glass-panel rounded-2xl p-6 border ${unlocked ? 'border-gray-800 hover:border-cyan-500/40' : 'border-gray-900 opacity-60'}`;
+          card.innerHTML = `
+            <div class="flex items-start justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${unlocked ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-gray-800 text-gray-600'}">
+                  ${unlocked ? lvl.level_number : '<i class="fa-solid fa-lock"></i>'}
+                </span>
+                <div>
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-800 text-cyan-400 border border-gray-700">${lvl.category}</span>
+                  <h3 class="text-lg font-bold text-white mt-1">${lvl.title}</h3>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-gray-400 mb-5 min-h-[36px]">${lvl.description || ''}</p>
+            <div class="grid grid-cols-2 gap-3 text-xs mb-5 p-3 rounded-xl bg-gray-900/60 border border-gray-800">
+              <div><span class="text-gray-500 block">Target:</span><span class="font-bold text-cyan-400">${lvl.target_wpm} WPM</span></div>
+              <div><span class="text-gray-500 block">Accuracy:</span><span class="font-bold text-emerald-400">${lvl.min_accuracy}%</span></div>
+            </div>
+            ${unlocked ? `
+              <button onclick="window.startLevelFromMap(${lvl.level_number})" class="w-full py-2.5 text-center text-xs font-semibold rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500 hover:text-black transition-all">
+                Start Level ${lvl.level_number}
+              </button>` : `
+              <button disabled class="w-full py-2.5 text-center text-xs rounded-xl bg-gray-900 text-gray-600 cursor-not-allowed">
+                <i class="fa-solid fa-lock mr-1"></i> Locked
+              </button>`}
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      window.startLevelFromMap = function(num) {
+        document.getElementById('navPracticeBtn').click();
+        selectLevel(num);
+      };
+
+      // Leaderboard View
+      function renderLeaderboard() {
+        const tbody = document.getElementById('leaderboardTableBody');
+        const podium = document.getElementById('podiumContainer');
+        const results = StorageService.getTestResults();
+
+        tbody.innerHTML = '';
+        if (results.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500">No test records saved yet. Complete a test!</td></tr>`;
+          podium.innerHTML = '';
+          return;
+        }
+
+        // Sort by WPM descending
+        const sorted = [...results].sort((a,b) => b.wpm - a.wpm);
+        
+        // Podium top 3
+        if (sorted.length >= 1) {
+          podium.innerHTML = `
+            <div class="glass-panel rounded-2xl p-6 border border-amber-400/40 text-center col-span-full sm:col-span-1 sm:col-start-2 bg-gradient-to-b from-amber-500/10 to-transparent">
+              <div class="w-12 h-12 mx-auto rounded-full bg-amber-400 text-black font-extrabold flex items-center justify-center text-xl mb-2">👑</div>
+              <h4 class="font-bold text-white text-base">${sorted[0].student_name}</h4>
+              <div class="text-2xl font-extrabold text-amber-400 font-mono my-1">${sorted[0].wpm} WPM</div>
+              <span class="text-xs text-emerald-400">${sorted[0].accuracy}% Accuracy</span>
+            </div>
+          `;
+        }
+
+        sorted.slice(0, 50).forEach((item, idx) => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-gray-800/40';
+          row.innerHTML = `
+            <td class="py-3 px-6 font-mono font-bold text-gray-400">#${idx + 1}</td>
+            <td class="py-3 px-6 font-semibold text-white">${item.student_name}</td>
+            <td class="py-3 px-6 text-cyan-300">Level ${item.level_number}</td>
+            <td class="py-3 px-6 font-mono font-bold text-cyan-400">${item.wpm} WPM</td>
+            <td class="py-3 px-6 text-emerald-400">${item.accuracy}%</td>
+            <td class="py-3 px-6 text-right text-gray-500">${item.created_at || 'Today'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      // Admin Panel Unlock
+      document.getElementById('adminLoginBtn').addEventListener('click', () => {
+        const pass = document.getElementById('adminPasswordInput').value;
+        if (pass === 'admin123' || pass === 'admin') {
+          document.getElementById('adminLockScreen').classList.add('hidden');
+          document.getElementById('adminDashboardContent').classList.remove('hidden');
+          loadAdminDashboard();
+        } else {
+          alert("Incorrect password! Default is admin123");
+        }
+      });
+
+      document.getElementById('adminLockBtn').addEventListener('click', () => {
+        document.getElementById('adminLockScreen').classList.remove('hidden');
+        document.getElementById('adminDashboardContent').classList.add('hidden');
+      });
+
+      function loadAdminDashboard() {
+        const results = StorageService.getTestResults();
+        levels = StorageService.getLevels();
+
+        document.getElementById('statTotalTests').textContent = results.length;
+        document.getElementById('statTotalLevels').textContent = levels.length;
+
+        if (results.length > 0) {
+          const avgWpm = Math.round(results.reduce((a, b) => a + b.wpm, 0) / results.length);
+          const passedCount = results.filter(r => r.passed).length;
+          document.getElementById('statAvgWpm').textContent = `${avgWpm} WPM`;
+          document.getElementById('statPassRate').textContent = `${Math.round((passedCount / results.length) * 100)}%`;
+        }
+
+        // Render Admin Levels Table
+        const lTbody = document.getElementById('adminLevelsTableBody');
+        lTbody.innerHTML = '';
+        levels.forEach(lvl => {
+          const row = document.createElement('tr');
+          row.className = 'border-b border-gray-800/60 hover:bg-gray-800/30';
+          row.innerHTML = `
+            <td class="py-3 px-4 font-bold text-cyan-400">#${lvl.level_number}</td>
+            <td class="py-3 px-4 font-semibold text-white">${lvl.title}</td>
+            <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-gray-800 text-cyan-300 border border-gray-700">${lvl.category}</span></td>
+            <td class="py-3 px-4 font-mono">${lvl.target_wpm} WPM / ${lvl.min_accuracy}%</td>
+            <td class="py-3 px-4 max-w-xs truncate text-gray-400 font-mono">${lvl.content}</td>
+            <td class="py-3 px-4 text-right">
+              <button onclick="window.deleteLevelAdmin(${lvl.level_number})" class="px-2.5 py-1 text-xs rounded bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          `;
+          lTbody.appendChild(row);
+        });
+
+        // Render Admin Results Table
+        const rTbody = document.getElementById('adminResultsTableBody');
+        rTbody.innerHTML = '';
+        results.slice(0, 30).forEach(item => {
+          const row = document.createElement('tr');
+          row.className = 'border-b border-gray-800/60';
+          row.innerHTML = `
+            <td class="py-2.5 px-4 font-semibold text-white">${item.student_name}</td>
+            <td class="py-2.5 px-4 text-cyan-300">Level ${item.level_number}</td>
+            <td class="py-2.5 px-4 font-bold text-cyan-400">${item.wpm} WPM</td>
+            <td class="py-2.5 px-4 text-emerald-400">${item.accuracy}%</td>
+            <td class="py-2.5 px-4">${item.passed ? '<span class="text-emerald-400 font-bold">PASSED</span>' : '<span class="text-rose-400 font-bold">FAILED</span>'}</td>
+            <td class="py-2.5 px-4 text-right text-gray-500">${item.created_at}</td>
+          `;
+          rTbody.appendChild(row);
+        });
+      }
+
+      window.deleteLevelAdmin = function(num) {
+        if (confirm(`Delete level ${num}?`)) {
+          levels = levels.filter(l => l.level_number !== num);
+          StorageService.saveLevels(levels);
+          loadAdminDashboard();
+          renderLevelPills();
+        }
+      };
+
+      // Add Level Modal Form
+      document.getElementById('openAddLevelModalBtn').addEventListener('click', () => {
+        document.getElementById('modalLevelNum').value = levels.length + 1;
+        document.getElementById('levelFormModal').classList.remove('hidden');
+      });
+
+      document.getElementById('levelModalForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newLvl = {
+          level_number: parseInt(document.getElementById('modalLevelNum').value),
+          title: document.getElementById('modalLevelTitle').value.trim(),
+          category: document.getElementById('modalLevelCategory').value.trim(),
+          description: document.getElementById('modalLevelDesc').value.trim(),
+          target_wpm: parseInt(document.getElementById('modalLevelWpm').value),
+          min_accuracy: parseInt(document.getElementById('modalLevelAcc').value),
+          content: document.getElementById('modalLevelContent').value.trim()
+        };
+        levels.push(newLvl);
+        StorageService.saveLevels(levels);
+        document.getElementById('levelFormModal').classList.add('hidden');
+        loadAdminDashboard();
+        renderLevelPills();
+      });
+
+      // Export CSV
+      document.getElementById('adminExportCsvBtn').addEventListener('click', () => {
+        const results = StorageService.getTestResults();
+        let csv = 'Student,Level,WPM,Accuracy,Passed,Timestamp\n';
+        results.forEach(r => {
+          csv += `"${r.student_name}",${r.level_number},${r.wpm},${r.accuracy},"${r.passed ? 'YES' : 'NO'}","${r.created_at}"\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `typing_records_${Date.now()}.csv`;
+        a.click();
+      });
+
+    });
+  </script>
+</body>
+</html>

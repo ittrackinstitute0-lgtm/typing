@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-8">
+
+  <!-- Header Banner -->
+  <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-white/5 relative overflow-hidden">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 inline-block mb-2">
+          <i class="fa-solid fa-trophy mr-1"></i> Hall of Fame
+        </span>
+        <h1 class="text-3xl font-extrabold text-white tracking-tight">Typing Speed Leaderboard</h1>
+        <p class="text-xs text-gray-400 mt-1">Celebrating our fastest students and master typists.</p>
+      </div>
+
+      <!-- Level Filter Dropdown -->
+      <div class="flex items-center gap-3">
+        <label for="leaderboardLevelFilter" class="text-xs text-gray-400">Filter Level:</label>
+        <select id="leaderboardLevelFilter" class="px-4 py-2 rounded-xl bg-gray-900 border border-gray-700 text-xs font-semibold text-cyan-300 outline-none cursor-pointer">
+          <option value="">🏆 All-Time Top Typists</option>
+          <option value="1">Level 1 - Home Row</option>
+          <option value="2">Level 2 - Home Row Fluency</option>
+          <option value="3">Level 3 - Top Row Reach</option>
+          <option value="4">Level 4 - Bottom Row Nav</option>
+          <option value="5">Level 5 - Common English</option>
+          <option value="6">Level 6 - Punctuation</option>
+          <option value="7">Level 7 - Numbers & Symbols</option>
+          <option value="8">Level 8 - Code Syntax</option>
+          <option value="9">Level 9 - Speed Sprint</option>
+          <option value="10">Level 10 - Grandmaster</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top 3 Typists Podium -->
+  <div id="podiumContainer" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end pt-4">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- Leaderboard Rankings Table -->
+  <div class="glass-panel rounded-3xl border border-white/5 overflow-hidden shadow-xl">
+    <div class="p-4 border-b border-gray-800/80 flex items-center justify-between">
+      <h3 class="text-sm font-bold text-gray-300 flex items-center gap-2">
+        <i class="fa-solid fa-ranking-star text-amber-400"></i> Global Typist Rankings
+      </h3>
+      <div class="relative w-64">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-500"></i>
+        <input type="text" id="leaderboardSearchInput" placeholder="Search typist name..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-gray-900/90 border border-gray-800 text-xs text-gray-200 placeholder-gray-500 outline-none focus:border-cyan-400">
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs">
+        <thead class="bg-gray-950/90 text-gray-400 uppercase font-mono tracking-wider border-b border-gray-800">
+          <tr>
+            <th class="py-3.5 px-6">Rank</th>
+            <th class="py-3.5 px-6">Typist Name</th>
+            <th class="py-3.5 px-6">Stage</th>
+            <th class="py-3.5 px-6">Speed</th>
+            <th class="py-3.5 px-6">Accuracy</th>
+            <th class="py-3.5 px-6 text-right">Last Active</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardTableBody" class="divide-y divide-gray-800/60 font-sans">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let rawLeaderboardData = [];
+
+  async function fetchLeaderboard(lvl = '') {
+    const url = lvl ? `/api/leaderboard?level=${lvl}` : '/api/leaderboard';
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      rawLeaderboardData = data.leaderboard || [];
+      renderLeaderboard(rawLeaderboardData);
+      renderPodium(rawLeaderboardData);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function renderPodium(list) {
+    const container = document.getElementById('podiumContainer');
+    if (!container) return;
+
+    if (!list || list.length < 3) {
+      container.innerHTML = '';
+      return;
+    }
+
+    const first = list[0];
+    const second = list[1];
+    const third = list[2];
+
+    container.innerHTML = `
+      <!-- Rank 2: Silver -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-400/30 text-center flex flex-col items-center justify-center order-2 sm:order-1 sm:h-52">
+        <div class="w-12 h-12 rounded-full bg-slate-300 text-black font-extrabold flex items-center justify-center text-lg mb-2 shadow-lg shadow-slate-300/20">
+          2
+        </div>
+        <h4 class="font-bold text-white text-base">${escapeHtml(second.student_name)}</h4>
+        <span class="text-xs text-gray-400 mb-2">Level ${second.level_number || 1}</span>
+        <div class="font-mono font-extrabold text-slate-300 text-2xl">${second.wpm} <span class="text-xs font-normal text-gray-500">WPM</span></div>
+        <span class="text-xs text-emerald-400 mt-1">${second.accuracy}% Accuracy</span>
+      </div>
+
+      <!-- Rank 1: Gold -->
+      <div class="glass-panel rounded-2xl p-6 border border-amber-400/40 text-center flex flex-col items-center justify-center order-1 sm:order-2 sm:h-64 bg-gradient-to-b from-amber-500/10 to-transparent shadow-xl shadow-amber-500/5">
+        <div class="w-14 h-14 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-200 text-black font-extrabold flex items-center justify-center text-2xl mb-2 shadow-lg shadow-amber-400/30">
+          👑
+        </div>
+        <h4 class="font-bold text-white text-lg">${escapeHtml(first.student_name)}</h4>
+        <span class="text-xs text-amber-300 font-semibold mb-2">Grandmaster • Level ${first.level_number || 1}</span>
+        <div class="font-mono font-extrabold text-amber-400 text-3xl">${first.wpm} <span class="text-xs font-normal text-gray-400">WPM</span></div>
+        <span class="text-xs text-emerald-400 mt-1 font-semibold">${first.accuracy}% Accuracy</span>
+      </div>
+
+      <!-- Rank 3: Bronze -->
+      <div class="glass-panel rounded-2xl p-5 border border-amber-700/30 text-center flex flex-col items-center justify-center order-3 sm:order-3 sm:h-48">
+        <div class="w-12 h-12 rounded-full bg-amber-700 text-amber-100 font-extrabold flex items-center justify-center text-lg mb-2 shadow-lg shadow-amber-700/20">
+          3
+        </div>
+        <h4 class="font-bold text-white text-base">${escapeHtml(third.student_name)}</h4>
+        <span class="text-xs text-gray-400 mb-2">Level ${third.level_number || 1}</span>
+        <div class="font-mono font-extrabold text-amber-600 text-2xl">${third.wpm} <span class="text-xs font-normal text-gray-500">WPM</span></div>
+        <span class="text-xs text-emerald-400 mt-1">${third.accuracy}% Accuracy</span>
+      </div>
+    `;
+  }
+
+  function renderLeaderboard(list) {
+    const tbody = document.getElementById('leaderboardTableBody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    if (!list || list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No typists ranked yet. Take a test to claim your spot!</td></tr>`;
+      return;
+    }
+
+    list.forEach(item => {
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-gray-800/40 transition-colors';
+
+      let rankBadge = `<span class="font-mono font-semibold text-gray-400">#${item.rank}</span>`;
+      if (item.rank === 1) rankBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">🥇 #1</span>`;
+      if (item.rank === 2) rankBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-400/20 text-slate-300 border border-slate-400/30 font-bold">🥈 #2</span>`;
+      if (item.rank === 3) rankBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-700/20 text-amber-400 border border-amber-700/30 font-bold">🥉 #3</span>`;
+
+      row.innerHTML = `
+        <td class="py-4 px-6">${rankBadge}</td>
+        <td class="py-4 px-6 font-semibold text-white flex items-center gap-2">
+          <div class="w-6 h-6 rounded-full bg-gray-800 flex items-center justify-center text-[10px] text-cyan-400 border border-gray-700">
+            ${escapeHtml(item.student_name.slice(0, 2).toUpperCase())}
+          </div>
+          <span>${escapeHtml(item.student_name)}</span>
+        </td>
+        <td class="py-4 px-6">
+          <span class="px-2.5 py-1 rounded-lg bg-gray-900 text-gray-300 border border-gray-800 text-xs">
+            Level ${item.level_number || 1}
+          </span>
+        </td>
+        <td class="py-4 px-6 font-mono font-extrabold text-cyan-400 text-sm">${item.wpm} <span class="text-[10px] font-normal text-gray-500">WPM</span></td>
+        <td class="py-4 px-6 font-mono text-emerald-400 font-semibold">${item.accuracy}%</td>
+        <td class="py-4 px-6 text-right text-xs text-gray-500">${item.created_at || 'Recently'}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchLeaderboard();
+
+    const levelFilter = document.getElementById('leaderboardLevelFilter');
+    if (levelFilter) {
+      levelFilter.addEventListener('change', (e) => {
+        fetchLeaderboard(e.target.value);
+      });
+    }
+
+    const searchInput = document.getElementById('leaderboardSearchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const filtered = rawLeaderboardData.filter(d => d.student_name.toLowerCase().includes(query));
+        renderLeaderboard(filtered);
+      });
+    }
+  });
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+</script>
+{% endblock %}

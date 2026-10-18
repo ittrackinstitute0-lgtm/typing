@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ settings.get('site_name', 'TypePulse - Modern Typing Mastery') }}</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js & Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top Announcement (if active) -->
+  {% if settings.get('announcement') %}
+  <div class="bg-gradient-to-r from-cyan-950 via-slate-900 to-cyan-950 border-b border-cyan-800/40 text-center py-1.5 px-4 text-xs font-medium text-cyan-300 flex items-center justify-center gap-2">
+    <i class="fa-solid fa-bullhorn text-cyan-400"></i>
+    <span>{{ settings.get('announcement') }}</span>
+  </div>
+  {% endif %}
+
+  <!-- Main Navigation Bar -->
+  <header class="border-b border-white/10 bg-slate-950/60 backdrop-blur-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-black font-extrabold shadow-lg shadow-cyan-500/25 group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-keyboard text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
+            Type<span class="text-cyan-400">Pulse</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">PRO</span>
+          </span>
+          <span class="text-[10px] text-gray-400 block -mt-1 tracking-wide">LEVELS • SPEED • ACCURACY</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-1 bg-gray-900/60 p-1.5 rounded-xl border border-white/5">
+        <a href="/" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all {{ 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold' if request.path == '/' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+          <i class="fa-solid fa-bolt mr-1.5"></i> Practice
+        </a>
+        <a href="/levels" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all {{ 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold' if request.path == '/levels' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+          <i class="fa-solid fa-layer-group mr-1.5"></i> Levels Map
+        </a>
+        <a href="/leaderboard" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all {{ 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold' if request.path == '/leaderboard' else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+          <i class="fa-solid fa-trophy mr-1.5 text-amber-400"></i> Leaderboard
+        </a>
+        <a href="/admin/dashboard" class="px-4 py-1.5 text-xs font-semibold rounded-lg transition-all {{ 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold' if request.path.startswith('/admin') else 'text-gray-400 hover:text-white hover:bg-white/5' }}">
+          <i class="fa-solid fa-shield-halved mr-1.5 text-purple-400"></i> Admin
+        </a>
+      </nav>
+
+      <!-- Right Controls: Audio Switch, Theme Selector & Student Pill -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Sound Effect Dropdown -->
+        <div class="relative flex items-center">
+          <label for="soundSelector" class="sr-only">Keyboard Sound</label>
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs text-gray-300">
+            <i class="fa-solid fa-volume-high text-cyan-400"></i>
+            <select id="soundSelector" class="bg-transparent text-xs text-gray-300 outline-none cursor-pointer">
+              <option value="clicky" class="bg-gray-900 text-white">Clicky (Blue)</option>
+              <option value="thock" class="bg-gray-900 text-white">Thock (Navy)</option>
+              <option value="tactile" class="bg-gray-900 text-white">Tactile (Brown)</option>
+              <option value="mute" class="bg-gray-900 text-white">Mute (Silent)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Theme Selector -->
+        <div class="hidden sm:flex items-center">
+          <label for="themeSelector" class="sr-only">Theme</label>
+          <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs text-gray-300">
+            <i class="fa-solid fa-palette text-cyan-400"></i>
+            <select id="themeSelector" class="bg-transparent text-xs text-gray-300 outline-none cursor-pointer">
+              <option value="cyber" class="bg-gray-900 text-white">Midnight Cyber</option>
+              <option value="monkey" class="bg-gray-900 text-white">Monkey Carbon</option>
+              <option value="synthwave" class="bg-gray-900 text-white">Retro Synth</option>
+              <option value="light" class="bg-gray-900 text-white">Clean Light</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Student Profile Button -->
+        <button id="studentProfileBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-xs font-semibold text-cyan-300 transition-all cursor-pointer">
+          <i class="fa-regular fa-user-circle text-cyan-400"></i>
+          <span id="navStudentName">{{ student_name or 'Guest' }}</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-cyan-500"></i>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Bottom Navigation -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-md border-t border-white/10 flex justify-around py-2.5">
+    <a href="/" class="flex flex-col items-center text-[10px] {{ 'text-cyan-400' if request.path == '/' else 'text-gray-400' }}">
+      <i class="fa-solid fa-bolt text-base mb-0.5"></i> Practice
+    </a>
+    <a href="/levels" class="flex flex-col items-center text-[10px] {{ 'text-cyan-400' if request.path == '/levels' else 'text-gray-400' }}">
+      <i class="fa-solid fa-layer-group text-base mb-0.5"></i> Levels
+    </a>
+    <a href="/leaderboard" class="flex flex-col items-center text-[10px] {{ 'text-cyan-400' if request.path == '/leaderboard' else 'text-gray-400' }}">
+      <i class="fa-solid fa-trophy text-base mb-0.5 text-amber-400"></i> Leaderboard
+    </a>
+    <a href="/admin/dashboard" class="flex flex-col items-center text-[10px] {{ 'text-cyan-400' if request.path.startswith('/admin') else 'text-gray-400' }}">
+      <i class="fa-solid fa-shield-halved text-base mb-0.5 text-purple-400"></i> Admin
+    </a>
+  </div>
+
+  <!-- Page Content Container -->
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6 space-y-2">
+          {% for category, message in messages %}
+            <div class="p-4 rounded-xl border text-sm font-medium flex items-center justify-between {{ 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' if category == 'success' else 'bg-rose-500/10 border-rose-500/30 text-rose-300' }}">
+              <span>{{ message }}</span>
+              <button onclick="this.parentElement.remove()" class="text-xs opacity-75 hover:opacity-100">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Modern Footer -->
+  <footer class="border-t border-white/5 py-6 bg-slate-950/40 text-center text-xs text-gray-500 mt-12 pb-16 md:pb-6">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-keyboard text-cyan-400"></i>
+        <span>TypePulse • Next-Generation Typing Levels Platform</span>
+      </div>
+      <div class="flex items-center gap-4 text-gray-400 font-mono text-[11px]">
+        <span><kbd class="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-300">Tab</kbd> + <kbd class="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-300">Enter</kbd> to restart</span>
+        <span>•</span>
+        <span><kbd class="px-1.5 py-0.5 rounded bg-gray-800 border border-gray-700 text-gray-300">Esc</kbd> for quick menu</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Student Profile Switcher Modal -->
+  <div id="studentProfileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-cyan-500/30 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-id-card text-cyan-400"></i> Student Profile
+        </h3>
+        <button id="closeStudentModalBtn" class="text-gray-400 hover:text-white text-lg">&times;</button>
+      </div>
+      <p class="text-xs text-gray-400 mb-4 leading-relaxed">
+        Enter your student name or Roll Number to save test scores, unlock levels, and rank on the global leaderboard.
+      </p>
+      <div class="mb-4">
+        <label for="studentUsernameInput" class="block text-xs font-semibold text-gray-300 mb-1.5">Student / Typist Username</label>
+        <input type="text" id="studentUsernameInput" value="{{ student_name if student_name != 'Guest Typist' else '' }}" placeholder="e.g. Alex_99 or Roll-104" class="w-full px-4 py-2.5 rounded-xl bg-gray-900/90 border border-gray-700 text-white text-sm focus:border-cyan-400 outline-none">
+      </div>
+      <div class="flex justify-end gap-2.5">
+        <button onclick="document.getElementById('studentProfileModal').classList.add('hidden')" class="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white">Cancel</button>
+        <button id="saveStudentBtn" class="px-5 py-2 rounded-xl text-xs font-bold bg-cyan-500 text-black hover:bg-cyan-400 transition-all">Save & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Scripts -->
+  <script src="{{ url_for('static', filename='js/sound.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/keyboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/engine.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/levels.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

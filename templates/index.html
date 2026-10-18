@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <!-- Top Toolbar: Mode Selection & Quick Controls -->
+  <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-3.5 rounded-2xl border border-white/5">
+    
+    <!-- Practice Mode Tabs -->
+    <div class="flex items-center gap-1.5 bg-gray-950/80 p-1 rounded-xl border border-white/5 text-xs font-semibold">
+      <button id="modeLevelBtn" class="px-3.5 py-1.5 rounded-lg bg-cyan-500/20 border border-cyan-400 text-cyan-300 font-bold transition-all">
+        <i class="fa-solid fa-gamepad mr-1"></i> Level Mode
+      </button>
+      <button id="modeWordsBtn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all">
+        <i class="fa-solid fa-font mr-1"></i> 25 Words
+      </button>
+      <button id="modeQuoteBtn" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition-all">
+        <i class="fa-solid fa-quote-left mr-1"></i> Quotes
+      </button>
+    </div>
+
+    <!-- Quick Level Pills Container -->
+    <div id="levelPillsContainer" class="flex items-center gap-1.5 overflow-x-auto py-1 max-w-full">
+      <!-- Populated via JavaScript -->
+    </div>
+
+    <!-- Keyboard Toggle & Quick Restart -->
+    <div class="flex items-center gap-2">
+      <button id="toggleKeyboardBtn" title="Toggle On-screen Virtual Keyboard" class="px-3 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs font-semibold text-cyan-400 hover:bg-gray-800 transition-all flex items-center gap-1.5">
+        <i class="fa-regular fa-keyboard"></i>
+        <span class="hidden sm:inline">Keyboard</span>
+      </button>
+      <button id="restartTestBtn" title="Restart Test (Tab + Enter)" class="px-3 py-1.5 rounded-xl bg-gray-900/80 border border-white/10 text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-800 transition-all flex items-center gap-1.5">
+        <i class="fa-solid fa-rotate-right text-cyan-400"></i>
+        <span class="hidden sm:inline">Restart</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Active Level Header Banner -->
+  <div class="glass-panel p-5 rounded-2xl border border-cyan-500/20 relative overflow-hidden">
+    <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none"></div>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2.5 mb-1.5">
+          <span id="activeLevelBadge" class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+            LEVEL 1
+          </span>
+          <h2 id="activeLevelTitle" class="text-xl font-bold text-white tracking-tight">Home Row Foundations</h2>
+        </div>
+        <p id="activeLevelDesc" class="text-xs text-gray-400">Master the anchor keys: A S D F for left hand and J K L ; for right hand.</p>
+      </div>
+
+      <div class="text-right sm:text-right">
+        <div id="activeLevelTarget" class="inline-block px-3.5 py-1.5 rounded-xl bg-gray-900/90 border border-gray-700/80 text-xs font-mono font-semibold text-cyan-300">
+          🎯 Target: 18 WPM | 85% Accuracy
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Stats Heads-Up Display (HUD) -->
+  <div class="grid grid-cols-3 gap-4">
+    <!-- Live WPM -->
+    <div class="glass-panel p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+      <span class="text-[11px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Speed (WPM)</span>
+      <span id="liveWpm" class="text-4xl font-extrabold text-cyan-400 font-mono tracking-tight">0</span>
+    </div>
+
+    <!-- Live Accuracy -->
+    <div class="glass-panel p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+      <span class="text-[11px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Accuracy</span>
+      <span id="liveAccuracy" class="text-4xl font-extrabold text-emerald-400 font-mono tracking-tight">100%</span>
+    </div>
+
+    <!-- Elapsed Time -->
+    <div class="glass-panel p-4 rounded-2xl border border-white/5 flex flex-col items-center justify-center text-center">
+      <span class="text-[11px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">Time</span>
+      <span id="liveTime" class="text-4xl font-extrabold text-amber-400 font-mono tracking-tight">0s</span>
+    </div>
+  </div>
+
+  <!-- Main Typing Canvas Arena -->
+  <div class="relative glass-panel rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl focus-within:border-cyan-500/40 transition-all cursor-text min-h-[180px] flex flex-col justify-between" onclick="document.getElementById('typingWords').focus()">
+    
+    <!-- Typing Words Stream Area -->
+    <div class="relative w-full">
+      <div id="customCaret" class="custom-caret" style="left: 0; top: 0; display: none;"></div>
+      <div id="typingWords" class="typing-box min-h-[110px] text-gray-300 focus:outline-none" tabindex="0">
+        <!-- Rendered by typing engine -->
+      </div>
+    </div>
+
+    <!-- Typing Progress Bar -->
+    <div class="w-full bg-gray-900 rounded-full h-1.5 mt-4 overflow-hidden border border-white/5">
+      <div id="typingProgressBar" class="bg-gradient-to-r from-cyan-500 to-emerald-400 h-1.5 rounded-full transition-all duration-150" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <!-- Interactive Mechanical Virtual Keyboard -->
+  <div id="virtualKeyboardWrapper" class="glass-panel p-5 rounded-2xl border border-white/5 shadow-xl transition-all">
+    <div class="flex items-center justify-between mb-3 text-xs text-gray-400">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-fingerprint text-cyan-400"></i>
+        <span class="font-semibold text-gray-300">Tactile Finger Placement Guide</span>
+      </div>
+      <div class="flex items-center gap-3 text-[10px] font-mono">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-pink-500"></span> Pinky</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Ring</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Middle</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Index</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Thumb</span>
+      </div>
+    </div>
+    
+    <!-- Keyboard Canvas -->
+    <div id="virtualKeyboard" class="overflow-x-auto py-2">
+      <!-- Populated via keyboard.js -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Results & Level Completion Modal -->
+<div id="resultsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+  <div class="glass-panel w-full max-w-lg rounded-3xl p-6 sm:p-8 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+    
+    <!-- Ambient Glow Background -->
+    <div class="absolute -top-12 -left-12 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Header & Stars -->
+    <div class="text-center mb-6">
+      <div id="modalStars" class="flex justify-center items-center mb-2">
+        <!-- Rendered dynamically -->
+      </div>
+      <h3 id="modalTitle" class="text-2xl font-extrabold text-white tracking-tight">Level Passed! 🎉</h3>
+      <div class="mt-2">
+        <span id="modalStatusBadge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          REQUIREMENTS MET
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Results Metrics Cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+        <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Net WPM</span>
+        <span id="modalWpm" class="text-2xl font-extrabold text-cyan-400 font-mono">0</span>
+      </div>
+      <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+        <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Accuracy</span>
+        <span id="modalAcc" class="text-2xl font-extrabold text-emerald-400 font-mono">0%</span>
+      </div>
+      <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+        <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Errors</span>
+        <span id="modalErrors" class="text-2xl font-extrabold text-rose-400 font-mono">0</span>
+      </div>
+      <div class="bg-gray-900/80 p-3 rounded-2xl border border-gray-800 text-center">
+        <span class="text-[10px] text-gray-400 uppercase font-bold block mb-0.5">Time</span>
+        <span id="modalTime" class="text-2xl font-extrabold text-amber-400 font-mono">0s</span>
+      </div>
+    </div>
+
+    <!-- Speed Trajectory Graph -->
+    <div class="mb-6 p-4 rounded-2xl bg-gray-950/80 border border-gray-800">
+      <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+        <span class="font-semibold text-gray-300"><i class="fa-solid fa-chart-line text-cyan-400 mr-1.5"></i> Speed Trajectory (WPM / sec)</span>
+        <span class="font-mono text-[11px] text-gray-500">Raw WPM: <span id="modalRawWpm" class="text-gray-300">0</span></span>
+      </div>
+      <div class="h-40 w-full">
+        <canvas id="resultsSpeedChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Modal Action Buttons -->
+    <div class="flex flex-col sm:flex-row items-center gap-3">
+      <button id="modalRetryBtn" class="w-full py-3 px-4 rounded-xl text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 transition-all flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-right"></i> Try Again
+      </button>
+      <button id="modalNextLevelBtn" class="w-full py-3 px-4 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2">
+        Next Level <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <a href="/leaderboard" class="w-full sm:w-auto py-3 px-4 rounded-xl text-xs font-semibold text-gray-400 hover:text-white text-center border border-transparent hover:border-gray-800">
+        Leaderboard
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

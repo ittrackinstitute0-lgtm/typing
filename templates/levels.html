@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-8">
+
+  <!-- Levels Roadmap Hero Header -->
+  <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-cyan-500/20 relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div>
+        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 inline-block mb-2">
+          Curriculum & Career Path
+        </span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Typing Levels Roadmap</h1>
+        <p class="text-sm text-gray-400 mt-2 max-w-xl leading-relaxed">
+          Step-by-step progressive mastery. Complete each level by achieving the required speed (WPM) and accuracy to unlock the next stage and claim 3-star honors!
+        </p>
+      </div>
+
+      <!-- Overall Progress Card -->
+      <div class="bg-gray-950/80 p-5 rounded-2xl border border-gray-800 min-w-[260px]">
+        <div class="flex items-center justify-between text-xs font-bold text-gray-400 mb-2">
+          <span>Overall Journey</span>
+          <span id="mapProgressText" class="text-cyan-400 font-mono">0 of 10 Completed</span>
+        </div>
+        <div class="w-full bg-gray-900 rounded-full h-2.5 overflow-hidden border border-white/5 mb-3">
+          <div id="mapProgressBar" class="bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] text-gray-500">
+          <span><i class="fa-solid fa-lock text-gray-600 mr-1"></i> Progressive Lock</span>
+          <span><i class="fa-solid fa-star text-amber-400 mr-1"></i> 3-Star Honors</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Levels Grid -->
+  <div id="levelsMapContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Populated dynamically by LevelController.renderLevelsMap() -->
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // If not on index page, initialize LevelController for levels.html
+    const levelCtrl = new window.LevelController(null);
+  });
+</script>
+{% endblock %}
